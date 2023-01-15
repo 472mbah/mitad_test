@@ -2,10 +2,23 @@ import math
 # import numpy as np
 import sys
 
+def inferSpeedFromDistance ( startingPoint, currentPoint, destination, maxSpeed ):
+	ratio = ( currentPoint - startingPoint ) / ( destination - startingPoint )
+	return math.sin(math.pi*ratio) * maxSpeed
+	
+def turnToAngle ( currentAngle, destinationAngle, rate=0.5 ):
+	return (destinationAngle - currentAngle) * rate
+§
+def addNode (node, store):
+	store[f"{node[0]}:{node[1]}"] = None
+
+def checkNode (node, store):
+	return f"{node[0]}:{node[1]}" in store
+
+
 """
 Going from cords to block unit -> Math.floor(value / block dimension)
 """
-
 
 def pythagoras (start, end):
 	return math.sqrt( (end[0]-start[0])**2  + (end[1] - start[1])**2   )
@@ -257,10 +270,6 @@ def calculateCAH (hypotenuse, angleInDegrees):
 	"""
 	radiansAngle = angleInDegrees * ( math.pi / 180  )
 	return math.cos(radiansAngle) * hypotenuse
-
-def calculateXY (hypotenuse, angleInDegrees):	
-	radiansAngle = angleInDegrees * ( math.pi / 180  )
-	return [math.cos(radiansAngle) * hypotenuse, math.sin(radiansAngle) * hypotenuse]
 
 if __name__ == "__main__":
 	#generateVelocities()
