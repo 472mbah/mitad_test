@@ -1,6 +1,30 @@
 import math
 # import numpy as np
 import sys
+from tf.transformations import euler_from_quaternion
+
+def getEuler(quaternion):
+    lst = [quaternion['x'], quaternion['y'], quaternion['z'], quaternion['w']]
+    data = euler_from_quaternion(lst)
+    return data
+
+def turnMode(position, targetPosition, twist, cmdvel_pub, rospy):
+	(x1, x2, yaw) = getEuler(position)
+   
+	newAngle = 0.5*(targetPosition - yaw)
+	if newAngle < 0.01:
+		newAngle = 0
+
+	twist.linear.x = 0
+	twist.linear.y = 0
+	twist.linear.z = 0
+
+	twist.angular.x = 0
+	twist.angular.y = 0
+	twist.angular.z = newAngle
+	rospy.loginfo(f"New Z is {newAngle}")
+	cmdvel_pub.publish(twist)
+	return newAngle == 0
 
 
 def moveMode ( INITIAL_POSITION, POSITION, DESTINATION, twist, cmdvel_pub, rospy ):
@@ -61,10 +85,10 @@ def inRange (cords, dimensions):
 	return cords[0] < 0 or cords[0] >= dimensions[0] or cords[1] < 0 or cords[1] >= dimensions[1]
 
 
-def runMitad (start, end, dimensions):
+def runMitad (start, end, dimensions, blockers, visited, blockSize):
 	
-	visited = {}
-	blockers = {'8:8':None}
+	#visited = {}
+	#blockers = {'8:8':None}
 	reserves = []
 	#end = [9, 9]	
 	#dimensions = [10, 10]
@@ -147,7 +171,7 @@ def identifyDirectionBetweenNodes (first, second):
 		"""	
 	# left
 	if first[0] == second[0] and (first[1] - second[1]) == 1:
-		return 270
+		return math.pi/2
 		"""
 		Example:
 		first    second	
@@ -155,7 +179,7 @@ def identifyDirectionBetweenNodes (first, second):
 		"""	
 	# bottom
 	if first[1] == second[1] and (second[0] - first[0]) == 1:
-		return 180
+		return math.pi
 		"""
 		Example:
 		first    second	
@@ -163,7 +187,7 @@ def identifyDirectionBetweenNodes (first, second):
 		"""	
 	# right
 	if first[0] == second[0] and (second[1] - first[1]) == 1:
-		return 90
+		return -math.pi/2
 		"""
 		Example:
 		first    second	
@@ -172,7 +196,7 @@ def identifyDirectionBetweenNodes (first, second):
 
 	# top left
 	if (first[0] - second[0])==1 and (first[1] - second[1]) == 1:
-		return 315
+		return math.pi/4
 		"""
 		Example:
 		first    second	
@@ -181,7 +205,7 @@ def identifyDirectionBetweenNodes (first, second):
 
 	# top right
 	if (first[0] - second[0])==1 and (second[1] - first[1]) == 1:
-		return 45
+		return -math.pi/4
 		"""
 		Example:
 		first    second	
@@ -190,7 +214,7 @@ def identifyDirectionBetweenNodes (first, second):
 	
 	# bottom right
 	if (second[0] - first[0])==1 and (second[1] - first[1]) == 1:
-		return 135
+		return -3*math.pi/4
 		"""
 		Example:
 		first    second	
@@ -199,7 +223,7 @@ def identifyDirectionBetweenNodes (first, second):
 
 	# bottom left
 	if (second[0] - first[0])==1 and (first[1] - second[1]) == 1:
-		return 225
+		return 3*math.pi/4
 		"""
 		Example:
 		first    second	
@@ -301,13 +325,17 @@ def calculateCAH (hypotenuse, angleInDegrees):
 	radiansAngle = angleInDegrees * ( math.pi / 180  )
 	return math.cos(radiansAngle) * hypotenuse
 
-if __name__ == "__main__":
+def getInstructions (start, end, dimensions, blockers, visited,  blockSize=1):
+	path = runMitad(start, end, dimensions, blockers, visited, blockSize)	
+	return generateVelocityMovement (path)		
+
+#if __name__ == "__main__":
 	#generateVelocities()
-	hyp = 20
-	angle = 20
-	print(" height  ", calculateSOH( hyp, angle  ))
-	print(" width  ", calculateCAH( hyp, angle  ))
-	
+	#hyp = 20
+	#angle = 20
+	#print(" height  ", calculateSOH( hyp, angle  ))
+	#print(" width  ", calculateCAH( hyp, angle  ))
+	#print(getInstructions([3, 3], [9, 9], [15, 15], {}, {}))
 	#path = runMitad([3, 3], [9, 9], [15, 15])
 	#path = generateVelocityMovement (path)		
 	#path = identifyTurningPoints(path)
