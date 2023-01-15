@@ -3,7 +3,7 @@ import math
 import sys
 
 
-def moveMode ( INITIAL_POSITION, POSITION, DESTINATION, twist, cmdvel_pub ):
+def moveMode ( INITIAL_POSITION, POSITION, DESTINATION, twist, cmdvel_pub, rospy ):
     #startingPoint = math.sqrt(INITIAL_POSITION.x**2 + INITIAL_POSITION.y**2)
     #currentPosition = math.sqrt(POSITION.x**2 + POSITION.y**2)
     #destinationPosition = math.sqrt(DESTINATION.x**2 + DESTINATION.y**2)
@@ -14,7 +14,7 @@ def moveMode ( INITIAL_POSITION, POSITION, DESTINATION, twist, cmdvel_pub ):
 
 
 	newSpeed = inferSpeedFromDistance( startingPoint, currentPosition, destinationPosition  )
-
+	rospy.loginfo(f"New speed is {newSpeed}")
     
     twist.linear.x = newSpeed
     twist.linear.y = 0
