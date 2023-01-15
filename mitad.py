@@ -32,7 +32,7 @@ def inferSpeedFromDistance ( startingPoint, currentPoint, destination, maxSpeed=
 	
 def turnToAngle ( currentAngle, destinationAngle, rate=0.5 ):
 	return (destinationAngle - currentAngle) * rate
-§
+
 def addNode (node, store):
 	store[f"{node[0]}:{node[1]}"] = None
 
