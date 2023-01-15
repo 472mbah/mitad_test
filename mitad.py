@@ -18,6 +18,9 @@ def moveMode ( INITIAL_POSITION, POSITION, DESTINATION, twist, cmdvel_pub, rospy
 	newSpeed = inferSpeedFromDistance(startingPoint, currentPosition, destinationPosition, rospy)
 	#rospy.loginfo(f"New speed is {newSpeed}")
     
+	if (newSpeed < 1e-2):
+		newSpeed = 0
+
 	twist.linear.x = newSpeed
 	twist.linear.y = 0
 	twist.linear.z = 0
@@ -26,11 +29,11 @@ def moveMode ( INITIAL_POSITION, POSITION, DESTINATION, twist, cmdvel_pub, rospy
 	twist.angular.y = 0
 	twist.angular.z = 0
 	cmdvel_pub.publish(twist)
-
+	
+	return newSpeed==0
 
 def inferSpeedFromDistance ( startingPoint, currentPoint, destination,rospy,  maxSpeed=0.6 ):
-	ratio = ( currentPoint - startingPoint ) / ( destination - startingPoint )
-	rospy.loginfo(f"Ratio is {ratio}")
+	ratio = (destination - currentPoint) / destination
 	return math.sin(math.pi*ratio) * maxSpeed
 	
 def turnToAngle ( currentAngle, destinationAngle, rate=0.5 ):
