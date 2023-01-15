@@ -2,7 +2,31 @@ import math
 # import numpy as np
 import sys
 
-def inferSpeedFromDistance ( startingPoint, currentPoint, destination, maxSpeed ):
+
+def moveMode ( INITIAL_POSITION, POSITION, DESTINATION, twist, cmdvel_pub ):
+    #startingPoint = math.sqrt(INITIAL_POSITION.x**2 + INITIAL_POSITION.y**2)
+    #currentPosition = math.sqrt(POSITION.x**2 + POSITION.y**2)
+    #destinationPosition = math.sqrt(DESTINATION.x**2 + DESTINATION.y**2)
+    
+    startingPoint = INITIAL_POSITION.x
+    currentPosition = POSITION.x
+    destinationPosition = DESTINATION.x
+
+
+	newSpeed = inferSpeedFromDistance( startingPoint, currentPosition, destinationPosition  )
+
+    
+    twist.linear.x = newSpeed
+    twist.linear.y = 0
+    twist.linear.z = 0
+
+    twist.angular.x = 0
+    twist.angular.y = 0
+    twist.angular.z = 0
+    cmdvel_pub.publish(twist)
+
+
+def inferSpeedFromDistance ( startingPoint, currentPoint, destination, maxSpeed=0.6 ):
 	ratio = ( currentPoint - startingPoint ) / ( destination - startingPoint )
 	return math.sin(math.pi*ratio) * maxSpeed
 	
