@@ -69,11 +69,6 @@ def addNode (node, store):
 def checkNode (node, store):
 	return f"{node[0]}:{node[1]}" in store
 
-
-"""
-Going from cords to block unit -> Math.floor(value / block dimension)
-"""
-
 def pythagoras (start, end):
 	return math.sqrt( (end[0]-start[0])**2  + (end[1] - start[1])**2   )
 
@@ -82,7 +77,7 @@ def inBucket (item, obj):
 
 # Ensure the cordinates do not go out of bound
 def inRange (cords, dimensions):
-	return cords[0] < 0 or cords[0] >= dimensions[0] or cords[1] < 0 or cords[1] >= dimensions[1]
+	return cords[0] < -dimensions[1] or cords[0] >= dimensions[0] or cords[1] < -dimensions[1] or cords[1] >= dimensions[1]
 
 
 def runMitad (start, end, dimensions, blockers, visited, blockSize):
@@ -151,6 +146,7 @@ def runMitad (start, end, dimensions, blockers, visited, blockSize):
 		visited[f"{options[bestNodeIndex][0]}:{options[bestNodeIndex][1]}"] = None		
 		pathResponse = mitad(options[bestNodeIndex])
 		if pathResponse:
+			addNode(options[bestNodeIndex], visited)
 			path.append(options[bestNodeIndex])
 			return True
 		return False			
@@ -325,8 +321,18 @@ def calculateCAH (hypotenuse, angleInDegrees):
 	radiansAngle = angleInDegrees * ( math.pi / 180  )
 	return math.cos(radiansAngle) * hypotenuse
 
-def getInstructions (start, end, dimensions, blockers, visited,  blockSize=1):
-	path = runMitad(start, end, dimensions, blockers, visited, blockSize)	
+
+"""
+Going from cords to block unit -> Math.floor(value / block dimension)
+"""
+def approximateCords (cords, blockSize):
+	return [ math.floor(cords['y']/blockSize), math.floor(cords['x']/blockSize) ]
+	
+
+def getInstructions (start, end, dimensions, blockers, visited, blockSize=1, transformCords=True):
+	start_ = approximateCords(start, blockSize) if transformCords else start
+	end_   = approximateCords(end, blockSize)   if transformCords else end
+	path   = runMitad(start_, end_, dimensions, blockers, visited, blockSize)	
 	return generateVelocityMovement (path)		
 
 #if __name__ == "__main__":
@@ -340,3 +346,9 @@ def getInstructions (start, end, dimensions, blockers, visited,  blockSize=1):
 	#path = generateVelocityMovement (path)		
 	#path = identifyTurningPoints(path)
 	#[ print(x) for x in path  ]
+#visited = {}
+#blocks = {}
+#print(getInstructions({ 'x':0, 'y':0, 'z':0 }, { 'x':-10, 'y':0, 'z':0 }, [15, 15], blocks, visited, 1, True))
+#print( "blocks", blocks )
+#print("visited ", visited)
+
